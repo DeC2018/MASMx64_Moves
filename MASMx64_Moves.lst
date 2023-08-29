@@ -1,0 +1,84 @@
+Microsoft (R) Macro Assembler (x64) Version 14.37.32822.0   08/30/23 04:35:45
+Moves.asm						     Page 1 - 1
+
+
+				; Moves.asm  - Testing the 64-bit move operations
+
+				ExitProcess proto
+
+ 00000000			.data
+ 00000000 57 65 6C 63 6F	message BYTE "Welcome to my 64-bit Library!",0
+	   6D 65 20 74 6F
+	   20 6D 79 20 36
+	   34 2D 62 69 74
+	   20 4C 69 62 72
+	   61 72 79 21 00
+ 0000001E			maxuint qword 0FFFFFFFFFFFFFFFFh
+	   FFFFFFFFFFFFFFFF
+ 00000026 55			myByte byte 55h
+ 00000027 6666			myWord word 6666h
+ 00000029 80000000		myDword dword 80000000h
+
+ 00000000			.code
+ 00000000			main proc
+				; Moving immediate values:
+ 00000000  48/ 8B 05			mov  rax,maxuint		; fill all bits in RAX
+	   0000001E R
+ 00000007  48/ B8			mov  rax,81111111h		; clears bits 32-63 (no sign extension)
+	   0000000081111111
+ 00000011  48/ C7 C0			mov  rax,06666h			; clears bits 16-63
+	   00006666
+ 00000018  48/ C7 C0			mov  rax,055h			; clears bits 8-63
+	   00000055
+
+				; Moving memory operands:
+ 0000001F  48/ 8B 05			mov  rax,maxuint		; fill all bits in RAX
+	   0000001E R
+ 00000026  8B 05 00000029 R		mov  eax,myDword		; clears bits 32-63 (no sign extension)
+ 0000002C  66| 8B 05			mov  ax,myWord			; affects only bits 0-15
+	   00000027 R
+ 00000033  8A 05 00000026 R		mov  al,myByte			; affects only bits 0-7
+
+				; 32-bit sign extension works like this
+ 00000039  66| C7 05			mov   myWord,8111h		; make it negative
+	   00000027 R
+	   8111
+ 00000042  0F BF 05			movsx eax,myWord			; EAX = FFFF8111h
+	   00000027 R
+
+				; The MOVSXD instruction (move with sign-extension) permits the 
+				; source operand to be a 32-bit register or memory operand:
+ 00000049  BB FFFFFFFF			mov     ebx,0FFFFFFFFh
+ 0000004E  48/ 63 C3			movsxd  rax,ebx				; rax = FFFFFFFFFFFFFFFF	
+
+ 00000051  B9 00000000			mov   ecx,0
+ 00000056  E8 00000000 E		call  ExitProcess
+ 0000005B			main endp
+
+				end
+Microsoft (R) Macro Assembler (x64) Version 14.37.32822.0   08/30/23 04:35:45
+Moves.asm						     Symbols 2 - 1
+
+
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+ExitProcess  . . . . . . . . . .	P 	 00000000 Length= 00000000 External
+main . . . . . . . . . . . . . .	P 	 00000000 _TEXT	Length= 0000005B Public
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+maxuint  . . . . . . . . . . . .	QWord	 0000001E _DATA	
+message  . . . . . . . . . . . .	Byte	 00000000 _DATA	
+myByte . . . . . . . . . . . . .	Byte	 00000026 _DATA	
+myDword  . . . . . . . . . . . .	DWord	 00000029 _DATA	
+myWord . . . . . . . . . . . . .	Word	 00000027 _DATA	
+
+	   0 Warnings
+	   0 Errors
